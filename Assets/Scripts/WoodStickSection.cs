@@ -120,6 +120,7 @@ public class WoodStickSection : MonoBehaviour
         _leftNeighbor.OnTemperatureChange += HandleNeighborTemperatureChange;
     }
 
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         // Gizmos.draw
@@ -130,4 +131,5 @@ public class WoodStickSection : MonoBehaviour
 
         Handles.Label(transform.position, $"{(int)_temperature}c", guiStyle);
     }
+#endif
 }

@@ -49,7 +49,7 @@ public class WoodLog : MonoBehaviour
             if (leftIndex >= 0 && leftIndex < _sections.Count)
             {
                 section.SetLeftNeighbor(_sections[leftIndex]);
-                section.GetComponent<Joint>().connectedBody = _sections[leftIndex].GetComponent<Rigidbody>();
+                section.Joint.connectedBody = _sections[leftIndex].Rigidbody;
             }
 
             var rightIndex = i + 1;
@@ -66,6 +66,7 @@ public class WoodLog : MonoBehaviour
 
     private void RemoveCubeFromLog(WoodCube destroyedCube)
     {
+        destroyedCube.OnDisintegration -= RemoveCubeFromLog;
         _sections.Remove(destroyedCube);
     }
 }

@@ -5,6 +5,8 @@ using UnityEngine;
 public class WoodCube : MonoBehaviour
 {
     [Range(10, 1000)] [SerializeField] private float m_WaitTimeToChangeTemp = 10;
+    // [SerializeField] private FixedJoint m_LeftJoint;
+    // [SerializeField] private FixedJoint m_RightJoint;
 
 
     public float Temperature => _temperature;
@@ -18,7 +20,11 @@ public class WoodCube : MonoBehaviour
 
 
     public WoodCube LeftNeighbor => _leftNeighbor;
+
     public WoodCube RightNeighbor => _rightNeighbor;
+
+    public Joint Joint => _joint;
+    public Rigidbody Rigidbody => _rigidBody;
 
     public event Action<WoodCube> OnDisintegration;
     public event Action<WoodCube> OnTemperatureChange;
@@ -36,6 +42,14 @@ public class WoodCube : MonoBehaviour
     private float _elapsedTime;
     private float _temperature;
     private bool shouldDisintegrate;
+    private Joint _joint;
+    private Rigidbody _rigidBody;
+
+    private void Awake()
+    {
+        _joint = GetComponent<Joint>();
+        _rigidBody = GetComponent<Rigidbody>();
+    }
 
     private void Update()
     {
@@ -55,11 +69,28 @@ public class WoodCube : MonoBehaviour
     {
         if (shouldDisintegrate)
         {
+            shouldDisintegrate = false;
             OnDisintegration?.Invoke(this);
+
+            if (LeftNeighbor && LeftNeighbor.Joint && LeftNeighbor.Joint.connectedBody == Rigidbody)
+            {
+                LeftNeighbor.DestroyJoint();
+            }
+
+            if (RightNeighbor && RightNeighbor.Joint && RightNeighbor.Joint.connectedBody == Rigidbody)
+            {
+                RightNeighbor.DestroyJoint();
+            }
+
             Destroy(gameObject);
         }
     }
 
+    private void DestroyJoint()
+    {
+        Destroy(_joint);
+        _joint = null;
+    }
 
     public void QueuePhysicsDisintegration()
     {

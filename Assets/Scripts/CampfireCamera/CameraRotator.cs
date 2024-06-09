@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace CampfireCamera
 {
@@ -14,6 +15,7 @@ namespace CampfireCamera
         {
             _targetAngle = transform.eulerAngles.y;
             _currentAngle = _targetAngle;
+            StartCoroutine(Spin());
         }
 
         private void Update()
@@ -26,7 +28,7 @@ namespace CampfireCamera
             {
                 _targetAngle -= 45;
             }
-            
+
             if (Input.GetMouseButton(2))
             {
                 var mouseX = Input.GetAxis("Mouse X");
@@ -57,6 +59,12 @@ namespace CampfireCamera
             _targetAngle = rotation.eulerAngles.y;
             _currentAngle = _targetAngle;
             transform.rotation = Quaternion.AngleAxis(_currentAngle, Vector3.up);
+        }
+
+        private IEnumerator Spin()
+        {
+            yield return new WaitForSeconds(0.25f);
+            _targetAngle = 225;
         }
     }
 }

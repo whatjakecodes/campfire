@@ -5,8 +5,8 @@ using UnityEngine;
 public class WoodCube : MonoBehaviour
 {
     [Range(10, 1000)] [SerializeField] private float m_WaitTimeToChangeTemp = 10;
-    // [SerializeField] private FixedJoint m_LeftJoint;
-    // [SerializeField] private FixedJoint m_RightJoint;
+    [SerializeField] private FixedJoint m_LeftJoint;
+    [SerializeField] private FixedJoint m_RightJoint;
 
 
     public float Temperature => _temperature;
@@ -23,7 +23,8 @@ public class WoodCube : MonoBehaviour
 
     public WoodCube RightNeighbor => _rightNeighbor;
 
-    public Joint Joint => _joint;
+    public Joint LeftJoint => m_LeftJoint;
+    public Joint RightJoint => m_RightJoint;
     public Rigidbody Rigidbody => _rigidBody;
 
     public event Action<WoodCube> OnDisintegration;
@@ -42,12 +43,10 @@ public class WoodCube : MonoBehaviour
     private float _elapsedTime;
     private float _temperature;
     private bool shouldDisintegrate;
-    private Joint _joint;
     private Rigidbody _rigidBody;
 
     private void Awake()
     {
-        _joint = GetComponent<Joint>();
         _rigidBody = GetComponent<Rigidbody>();
     }
 
@@ -72,24 +71,30 @@ public class WoodCube : MonoBehaviour
             shouldDisintegrate = false;
             OnDisintegration?.Invoke(this);
 
-            if (LeftNeighbor && LeftNeighbor.Joint && LeftNeighbor.Joint.connectedBody == Rigidbody)
+            if (LeftNeighbor && LeftNeighbor.LeftJoint && LeftNeighbor.LeftJoint.connectedBody == Rigidbody)
             {
-                LeftNeighbor.DestroyJoint();
+                LeftNeighbor.DestroyRightJoint();
             }
 
-            if (RightNeighbor && RightNeighbor.Joint && RightNeighbor.Joint.connectedBody == Rigidbody)
+            if (RightNeighbor && RightNeighbor.LeftJoint && RightNeighbor.LeftJoint.connectedBody == Rigidbody)
             {
-                RightNeighbor.DestroyJoint();
+                RightNeighbor.DestroyLeftJoint();
             }
 
             Destroy(gameObject);
         }
     }
 
-    private void DestroyJoint()
+    public void DestroyRightJoint()
     {
-        Destroy(_joint);
-        _joint = null;
+        Destroy(m_RightJoint);
+        m_RightJoint = null;
+    }
+    
+    public void DestroyLeftJoint()
+    {
+        Destroy(m_LeftJoint);
+        m_LeftJoint = null;
     }
 
     public void QueuePhysicsDisintegration()

@@ -49,13 +49,22 @@ public class WoodLog : MonoBehaviour
             if (leftIndex >= 0 && leftIndex < _sections.Count)
             {
                 section.SetLeftNeighbor(_sections[leftIndex]);
-                section.Joint.connectedBody = _sections[leftIndex].Rigidbody;
+                section.LeftJoint.connectedBody = _sections[leftIndex].Rigidbody;
+            }
+            else
+            {
+                section.DestroyLeftJoint();
             }
 
             var rightIndex = i + 1;
             if (rightIndex >= 0 && rightIndex < _sections.Count)
             {
                 section.SetRightNeighbor(_sections[rightIndex]);
+                section.RightJoint.connectedBody = _sections[rightIndex].Rigidbody;
+            }
+            else
+            {
+                section.DestroyRightJoint();
             }
         }
 

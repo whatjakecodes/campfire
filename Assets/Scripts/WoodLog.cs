@@ -1,10 +1,12 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-public class WoodStick : MonoBehaviour
+public class WoodLog : MonoBehaviour
 {
     // degrees Celsius
     // flash point = 300
-    // ignition point = 400
+    // autoignition point = 400
     // combustion = 400 - 700
     [Range(250, 300)] [SerializeField] private float _flashPointTemp = 300;
     [Range(301, 400)] [SerializeField] private float _ignitionTemp = 301;
@@ -21,21 +23,22 @@ public class WoodStick : MonoBehaviour
     [SerializeField] private Color m_BurntColor = Color.black;
 
     private float _currentTemperature;
-    private WoodStickSection[] _sections;
+    private List<WoodCube> _sections;
 
     private void Awake()
     {
-        _sections = GetComponentsInChildren<WoodStickSection>();
+        _sections = GetComponentsInChildren<WoodCube>().ToList();
     }
 
     void Start()
     {
-        for (var i = 0; i < _sections.Length; i++)
+        for (var i = 0; i < _sections.Count; i++)
         {
             var section = _sections[i];
+            section.OnDisintegration += RemoveCubeFromLog;
             section.InitTemperature(m_StartingTemperature);
             section.IsCombusted = false;
-            section.Energy = m_TotalEnergy / _sections.Length;
+            section.Energy = m_TotalEnergy / _sections.Count;
             section.BurnRate = m_BurnRate;
 
             section.FlashPointTemp = _flashPointTemp;
@@ -43,13 +46,14 @@ public class WoodStick : MonoBehaviour
             section.CombustionTemp = _combustionTemp;
 
             var leftIndex = i - 1;
-            if (leftIndex >= 0 && leftIndex < _sections.Length)
+            if (leftIndex >= 0 && leftIndex < _sections.Count)
             {
                 section.SetLeftNeighbor(_sections[leftIndex]);
+                section.GetComponent<Joint>().connectedBody = _sections[leftIndex].GetComponent<Rigidbody>();
             }
 
             var rightIndex = i + 1;
-            if (rightIndex >= 0 && rightIndex < _sections.Length)
+            if (rightIndex >= 0 && rightIndex < _sections.Count)
             {
                 section.SetRightNeighbor(_sections[rightIndex]);
             }
@@ -59,8 +63,9 @@ public class WoodStick : MonoBehaviour
         _sections[0].IsCombusted = true;
     }
 
-    // Update is called once per frame
-    void Update()
+
+    private void RemoveCubeFromLog(WoodCube destroyedCube)
     {
+        _sections.Remove(destroyedCube);
     }
 }

@@ -14,9 +14,10 @@ namespace CampfireCamera
             _camera = GetComponentInChildren<Camera>();
         }
 
-        private void Start()
+        private void OnDrawGizmos()
         {
-            _camera.transform.LookAt(m_FocusTarget);
+            Gizmos.color = Color.red;
+            Gizmos.DrawCube(transform.position, Vector3.one * 0.5f);
         }
     }
 }

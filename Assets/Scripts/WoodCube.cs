@@ -2,9 +2,10 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-public class WoodStickSection : MonoBehaviour
+public class WoodCube : MonoBehaviour
 {
     [Range(10, 1000)] [SerializeField] private float m_WaitTimeToChangeTemp = 10;
+
 
     public float Temperature => _temperature;
 
@@ -16,13 +17,14 @@ public class WoodStickSection : MonoBehaviour
     public float CombustionTemp { get; set; }
 
 
-    public WoodStickSection LeftNeighbor => _leftNeighbor;
-    public WoodStickSection RightNeighbor => _rightNeighbor;
+    public WoodCube LeftNeighbor => _leftNeighbor;
+    public WoodCube RightNeighbor => _rightNeighbor;
 
-    public event Action<WoodStickSection> OnTemperatureChange;
+    public event Action<WoodCube> OnDisintegration;
+    public event Action<WoodCube> OnTemperatureChange;
 
-    private WoodStickSection _leftNeighbor;
-    private WoodStickSection _rightNeighbor;
+    private WoodCube _leftNeighbor;
+    private WoodCube _rightNeighbor;
 
     private float _flashPointTemp = 300;
     private float _ignitionTemp = 301;
@@ -33,8 +35,9 @@ public class WoodStickSection : MonoBehaviour
     private float _targetTemp;
     private float _elapsedTime;
     private float _temperature;
+    private bool shouldDisintegrate;
 
-    void Update()
+    private void Update()
     {
         if (IsCombusted)
         {
@@ -46,6 +49,21 @@ public class WoodStickSection : MonoBehaviour
         }
 
         _elapsedTime += Time.deltaTime;
+    }
+
+    private void FixedUpdate()
+    {
+        if (shouldDisintegrate)
+        {
+            OnDisintegration?.Invoke(this);
+            Destroy(gameObject);
+        }
+    }
+
+
+    public void QueuePhysicsDisintegration()
+    {
+        shouldDisintegrate = true;
     }
 
     public void InitTemperature(float initialTemperature)
@@ -77,7 +95,7 @@ public class WoodStickSection : MonoBehaviour
     {
     }
 
-    private void HandleNeighborTemperatureChange(WoodStickSection section)
+    private void HandleNeighborTemperatureChange(WoodCube section)
     {
         var potentialTargetTemp = 0f;
 
@@ -98,7 +116,7 @@ public class WoodStickSection : MonoBehaviour
         }
     }
 
-    public void SetRightNeighbor(WoodStickSection value)
+    public void SetRightNeighbor(WoodCube value)
     {
         if (_rightNeighbor)
         {
@@ -109,7 +127,7 @@ public class WoodStickSection : MonoBehaviour
         _rightNeighbor.OnTemperatureChange += HandleNeighborTemperatureChange;
     }
 
-    public void SetLeftNeighbor(WoodStickSection value)
+    public void SetLeftNeighbor(WoodCube value)
     {
         if (_leftNeighbor)
         {
